@@ -14,15 +14,16 @@ npm run preview   # Preview production build
 
 ## Architecture
 
-This is a single-component React app (Vite + React 19). All logic lives in `src/App.jsx` — there are no sub-components, routing, or external state management.
+React 19 app built with Vite. `App.jsx` is the single stateful root; all UI is split into components under `src/components/`.
 
-**State in `App.jsx`:**
-- `transactions` — array of `{ id, description, amount, type, category, date }`. `amount` is stored as a string (known bug — causes incorrect arithmetic in totals).
-- `filterType` / `filterCategory` — control which transactions are shown in the table.
+**Component structure:**
+- `App.jsx` — holds the `transactions` array state and passes data/callbacks down. No UI of its own beyond the page shell.
+- `components/Summary.jsx` — receives `transactions`, computes `totalIncome`, `totalExpenses`, and `balance` internally.
+- `components/TransactionForm.jsx` — owns its own form state (`description`, `amount`, `type`, `category`). Calls `onAdd(transaction)` prop when submitted.
+- `components/TransactionList.jsx` — receives `transactions`, owns its own `filterType` / `filterCategory` state internally.
 
-**Data flow:** all transaction CRUD and filtering happens inline in `App.jsx`. There is no persistence; data resets on page refresh.
+**Transaction shape:** `{ id, description, amount (number), type ("income"|"expense"), category, date (YYYY-MM-DD) }`
 
-**Known issues (intentional for the course):**
-- `amount` is stored as a string instead of a number, causing incorrect income/expense totals.
-- UI styling needs improvement.
-- Code structure is monolithic and could be split into components.
+**Data flow:** `App` owns the source-of-truth list. `TransactionForm` creates new entries via `onAdd`. There is no persistence; data resets on page refresh.
+
+**Shared constant:** `categories` array is currently duplicated in `TransactionForm` and `TransactionList`.
